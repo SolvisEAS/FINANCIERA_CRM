@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="financiera_crm.Panel">
+    <div class="o_action o_fin_panel">
+        <div class="o_fin_panel_cabecera">
+            <div>
+                <h2 class="mb-0" t-out="this.titulo"/>
+                <div class="text-muted small" t-if="this.panel === 'mi_dia' and this.state.datos">
+                    <t t-out="this.state.datos.usuario"/> · <t t-out="this.state.datos.fecha"/>
+                </div>
+            </div>
+            <div class="o_fin_filtros" t-if="this.panel === 'semana'">
+                <select class="form-select form-select-sm" t-on-change="(ev) => this.cambiarPeriodo(ev)">
+                    <option value="esta_semana" t-att-selected="this.state.periodo === 'esta_semana'">Esta semana</option>
+                    <option value="semana_pasada" t-att-selected="this.state.periodo === 'semana_pasada'">Semana pasada</option>
+                    <option value="este_mes" t-att-selected="this.state.periodo === 'este_mes'">Este mes</option>
+                    <option value="mes_pasado" t-att-selected="this.state.periodo === 'mes_pasado'">Mes pasado</option>
+                    <option value="rango" t-att-selected="this.state.periodo === 'rango'">Rango…</option>
+                </select>
+                <t t-if="this.state.periodo === 'rango'">
+                    <input type="date" class="form-control form-control-sm" t-att-value="this.state.desde"
+                           t-on-change="(ev) => this.cambiarFecha('desde', ev)"/>
+                    <input type="date" class="form-control form-control-sm" t-att-value="this.state.hasta"
+                           t-on-change="(ev) => this.cambiarFecha('hasta', ev)"/>
+                </t>
+                <select t-if="this.state.datos and this.state.datos.es_admin" class="form-select form-select-sm"
+                        t-on-change="(ev) => this.cambiarVendedora(ev)">
+                    <option value="">Todo el equipo</option>
+                    <t t-foreach="this.state.datos.vendedoras" t-as="v" t-key="v.id">
+                        <option t-att-value="v.id" t-att-selected="String(v.id) === this.state.userId" t-out="v.nombre"/>
+                    </t>
+                </select>
+            </div>
+            <div class="o_fin_filtros" t-if="this.panel === 'objetivos'">
+                <button class="btn btn-sm btn-light" t-on-click="() => this.moverMes(-1)">‹</button>
+                <span class="fw-bold px-2"><t t-out="this.meses[this.state.mes - 1]"/> <t t-out="this.state.anio"/></span>
+                <button class="btn btn-sm btn-light" t-on-click="() => this.moverMes(1)">›</button>
+                <button t-if="this.state.datos and this.state.datos.es_admin" class="btn btn-sm btn-primary ms-2"
+                        t-on-click="() => this.abrirCargaObjetivos()">Cargar objetivos</button>
+            </div>
+        </div>
+
+        <div t-if="this.state.cargando and !this.state.datos" class="o_fin_cargando">Cargando…</div>
+        <t t-elif="this.panel === 'mi_dia'" t-call="financiera_crm.PanelMiDia"/>
+        <t t-elif="this.panel === 'semana'" t-call="financiera_crm.PanelSemana"/>
+        <t t-elif="this.panel === 'objetivos'" t-call="financiera_crm.PanelObjetivos"/>
+    </div>
+</t>
+
+<!-- ============================ MI DÍA ============================ -->
+<t t-name="financiera_crm.PanelMiDia">
+    <t t-set="d" t-value="this.state.datos"/>
+    <div class="o_fin_kpis">
+        <div class="o_fin_kpi o_fin_kpi_alerta" t-on-click="() => this.abrirOportunidades(d.dominios.sin_contactar, 'Sin contactar')">
+            <div class="o_fin_kpi_valor" t-out="d.kpis.sin_contactar"/>
+            <div class="o_fin_kpi_label">Sin contactar</div>
+        </div>
+        <div class="o_fin_kpi" t-on-click="() => this.abrirTareas(d.dominios.tareas_hoy, 'Tareas de hoy')">
+            <div class="o_fin_kpi_valor" t-out="d.kpis.tareas_hoy"/>
+            <div class="o_fin_kpi_label">Tareas de hoy</div>
+        </div>
+        <div t-attf-class="o_fin_kpi #{d.kpis.tareas_vencidas ? 'o_fin_kpi_rojo' : ''}"
+             t-on-click="() => this.abrirTareas(d.dominios.tareas_vencidas, 'Tareas vencidas')">
+            <div class="o_fin_kpi_valor" t-out="d.kpis.tareas_vencidas"/>
+            <div class="o_fin_kpi_label">Tareas vencidas</div>
+        </div>
+        <div class="o_fin_kpi" t-on-click="() => this.abrirOportunidades(d.dominios.nuevas_semana, 'Nuevas esta semana')">
+            <div class="o_fin_kpi_valor" t-out="d.kpis.nuevas_semana"/>
+            <div class="o_fin_kpi_label">Nuevas esta semana</div>
+        </div>
+        <div t-attf-class="o_fin_kpi #{d.kpis.sin_tarea ? 'o_fin_kpi_rojo' : 'o_fin_kpi_ok'}"
+             t-on-click="() => this.abrirOportunidades(d.dominios.sin_tarea, 'Sin tarea futura')">
+            <div class="o_fin_kpi_valor" t-out="d.kpis.sin_tarea"/>
+            <div class="o_fin_kpi_label">Sin tarea futura</div>
+        </div>
+    </div>
+
+    <div class="o_fin_grilla">
+        <div class="o_fin_card o_fin_card_ancha">
+            <div class="o_fin_card_titulo">Tareas de hoy <span class="text-muted small">(primer contacto arriba)</span></div>
+            <div t-if="!d.tareas.length" class="o_fin_vacio">No hay tareas para hoy 🎉</div>
+            <div t-foreach="d.tareas" t-as="t" t-key="t.id"
+                 t-attf-class="o_fin_tarea_fila #{t.primer_contacto ? 'o_fin_tarea_pc' : ''} #{t.vencida ? 'o_fin_tarea_fila_vencida' : ''}">
+                <div class="o_fin_tarea_hora">
+                    <div class="fw-bold" t-out="t.hora"/>
+                    <div class="small text-muted" t-if="t.vencida" t-out="t.dia"/>
+                </div>
+                <div class="o_fin_tarea_cuerpo" t-on-click="() => this.abrirOportunidad(t.lead_id)">
+                    <div class="fw-semibold text-truncate" t-out="t.asunto"/>
+                    <div class="small text-muted">
+                        <span t-attf-class="o_fin_badge o_fin_badge_#{t.producto}" t-out="t.producto_nombre"/>
+                        <t t-out="t.modalidad"/>
+                        <t t-if="d.es_admin"> · <t t-out="t.vendedora"/></t>
+                        <span t-if="t.cliente_escribio" class="o_fin_aviso_wa ms-1">El cliente escribió</span>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-primary" t-on-click="() => this.concluir(t.id)">Concluir</button>
+            </div>
+        </div>
+
+        <div class="o_fin_card">
+            <div class="o_fin_card_titulo">Mi avance del mes</div>
+            <div t-foreach="d.objetivos.filas" t-as="f" t-key="f.producto" class="o_fin_barra_fila">
+                <div class="d-flex justify-content-between small">
+                    <span t-out="f.nombre"/>
+                    <span><b t-out="f.logrado"/> / <t t-out="f.meta"/> · <t t-out="this.pct(f.pct)"/></span>
+                </div>
+                <div class="o_fin_barra"><div t-attf-class="o_fin_barra_relleno o_fin_relleno_#{this.semaforoPct(f.pct)}"
+                                              t-att-style="this.ancho(f.pct, 100)"/></div>
+            </div>
+            <div class="o_fin_global">
+                <div><div class="o_fin_global_valor" t-out="this.pct(d.objetivos.promedio)"/><div class="small text-muted">Promedio por producto<t t-if="d.objetivos.tope"> (tope 100 %)</t></div></div>
+                <div><div class="o_fin_global_valor" t-out="this.pct(d.objetivos.unificado)"/><div class="small text-muted">Total unificado</div></div>
+            </div>
+        </div>
+
+        <div class="o_fin_card">
+            <div class="o_fin_card_titulo">Tiempo a primer contacto</div>
+            <div class="o_fin_comparar">
+                <div>
+                    <div class="small text-muted">Esta semana</div>
+                    <div class="o_fin_global_valor" t-out="this.horas(d.tiempo.actual)"/>
+                    <div class="small text-muted"><t t-out="d.tiempo.n_actual"/> contactos</div>
+                </div>
+                <div>
+                    <div class="small text-muted">Semana pasada</div>
+                    <div class="o_fin_global_valor" t-out="this.horas(d.tiempo.anterior)"/>
+                    <div class="small text-muted"><t t-out="d.tiempo.n_anterior"/> contactos</div>
+                </div>
+            </div>
+            <div class="small text-muted mt-2">En horas hábiles. Objetivo (SLA): <t t-out="this.horas(d.tiempo.sla)"/>.</div>
+        </div>
+
+        <div class="o_fin_card">
+            <div class="o_fin_card_titulo">Esperando primer contacto</div>
+            <div t-if="!d.sin_contactar.length" class="o_fin_vacio">Todas contactadas ✔</div>
+            <div t-foreach="d.sin_contactar" t-as="s" t-key="s.id" class="o_fin_lista_fila" t-on-click="() => this.abrirOportunidad(s.id)">
+                <span t-attf-class="o_fin_semaforo o_fin_semaforo_#{s.semaforo}"/>
+                <span class="flex-grow-1 text-truncate" t-out="s.nombre"/>
+                <span class="small text-muted">hace <t t-out="this.horas(s.horas)"/></span>
+            </div>
+        </div>
+    </div>
+</t>
+
+<!-- ============================ SEMANA ============================ -->
+<t t-name="financiera_crm.PanelSemana">
+    <t t-set="d" t-value="this.state.datos"/>
+    <div class="o_fin_kpis">
+        <div class="o_fin_kpi" t-on-click="() => this.abrirOportunidades(d.nuevas.dominio, 'Oportunidades nuevas')">
+            <div class="o_fin_kpi_label"><t t-out="d.etiqueta"/>: nuevas</div>
+            <div class="o_fin_kpi_valor" t-out="d.nuevas.actual"/>
+            <div t-attf-class="small #{this.claseVariacion(d.nuevas.variacion)}">
+                <t t-out="this.flecha(d.nuevas.variacion)"/> <t t-out="this.pct(d.nuevas.variacion)"/>
+                <span class="text-muted">vs <t t-out="d.nuevas.anterior"/> (<t t-out="d.etiqueta_ant"/>)</span>
+            </div>
+        </div>
+        <div class="o_fin_kpi" t-on-click="() => this.abrirOportunidades(d.ganadas.dominio, 'Ganadas')">
+            <div class="o_fin_kpi_label">Ganadas</div>
+            <div class="o_fin_kpi_valor" t-out="d.ganadas.actual.cantidad"/>
+            <div t-attf-class="small #{this.claseVariacion(d.ganadas.variacion)}">
+                <t t-out="this.flecha(d.ganadas.variacion)"/> <t t-out="this.pct(d.ganadas.variacion)"/>
+                <span class="text-muted">vs <t t-out="d.ganadas.anterior.cantidad"/></span>
+            </div>
+        </div>
+        <div class="o_fin_kpi" t-on-click="() => this.abrirOportunidades(d.ganadas.dominio, 'Ganadas')">
+            <div class="o_fin_kpi_label">Importe ganado</div>
+            <div class="o_fin_kpi_valor o_fin_kpi_valor_chico" t-out="this.gsCorto(d.ganadas.actual.importe)"/>
+            <div t-attf-class="small #{this.claseVariacion(d.ganadas.variacion_importe)}">
+                <t t-out="this.flecha(d.ganadas.variacion_importe)"/> <t t-out="this.pct(d.ganadas.variacion_importe)"/>
+                <span class="text-muted">vs <t t-out="this.gsCorto(d.ganadas.anterior.importe)"/></span>
+            </div>
+        </div>
+        <div class="o_fin_kpi">
+            <div class="o_fin_kpi_label">Conversión (ganadas / cerradas)</div>
+            <div class="o_fin_kpi_valor" t-out="this.pct(d.ganadas.actual.conversion)"/>
+            <div class="small text-muted">antes: <t t-out="this.pct(d.ganadas.anterior.conversion)"/></div>
+        </div>
+        <div class="o_fin_kpi">
+            <div class="o_fin_kpi_label">Producto que más entró</div>
+            <div class="o_fin_kpi_valor o_fin_kpi_valor_chico" t-out="d.top_actual ? d.top_actual.nombre : '—'"/>
+            <div class="small text-muted"><t t-out="d.etiqueta_ant"/>: <t t-out="d.top_anterior ? d.top_anterior.nombre : '—'"/></div>
+        </div>
+    </div>
+
+    <div class="o_fin_grilla">
+        <div class="o_fin_card">
+            <div class="o_fin_card_titulo">Nuevas por producto</div>
+            <t t-set="maxProd" t-value="this.maximo(d.por_producto, 'actual', 'anterior')"/>
+            <div t-foreach="d.por_producto" t-as="p" t-key="p.producto" class="o_fin_barra_fila">
+                <div class="small d-flex justify-content-between"><span t-out="p.nombre"/><span><b t-out="p.actual"/> vs <t t-out="p.anterior"/></span></div>
+                <div class="o_fin_barra o_fin_barra_doble">
+                    <div t-attf-class="o_fin_barra_relleno o_fin_relleno_#{p.producto}" t-att-style="this.ancho(p.actual, maxProd)"/>
+                </div>
+                <div class="o_fin_barra o_fin_barra_doble o_fin_barra_anterior">
+                    <div class="o_fin_barra_relleno o_fin_relleno_gris" t-att-style="this.ancho(p.anterior, maxProd)"/>
+                </div>
+            </div>
+            <div class="small text-muted mt-1"><span class="o_fin_leyenda o_fin_relleno_prestamo"/> <t t-out="d.etiqueta"/>
+                <span class="o_fin_leyenda o_fin_relleno_gris ms-2"/> <t t-out="d.etiqueta_ant"/></div>
+        </div>
+
+        <div class="o_fin_card">
+            <div class="o_fin_card_titulo">Pipeline abierto</div>
+            <t t-set="maxPipe" t-value="this.maximo(d.pipeline, 'cantidad')"/>
+            <div t-foreach="d.pipeline" t-as="e" t-key="e.id" class="o_fin_embudo_fila"
+                 t-on-click="() => this.abrirOportunidades(d.dominio_base.concat([['stage_id', '=', e.id]]), e.etapa)">
+                <div class="o_fin_embudo_label" t-out="e.etapa"/>
+                <div class="o_fin_embudo_barra"><div class="o_fin_embudo_relleno" t-att-style="this.ancho(e.cantidad, maxPipe)">
+                    <span t-out="e.cantidad"/></div></div>
+                <div class="o_fin_embudo_importe" t-out="this.gsCorto(e.importe)"/>
+            </div>
+        </div>
+
+        <div class="o_fin_card">
+            <div class="o_fin_card_titulo">Perdidas por motivo</div>
+            <div t-if="!d.perdidas.length" class="o_fin_vacio">Sin pérdidas en el período</div>
+            <t t-set="maxPerd" t-value="this.maximo(d.perdidas, 'cantidad')"/>
+            <div t-foreach="d.perdidas" t-as="p" t-key="p_index" class="o_fin_barra_fila"
+                 t-on-click="() => this.abrirOportunidades(d.perdidas_dominio, 'Perdidas')">
+                <div class="small d-flex justify-content-between"><span t-out="p.motivo"/><b t-out="p.cantidad"/></div>
+                <div class="o_fin_barra"><div class="o_fin_barra_relleno o_fin_relleno_rojo" t-att-style="this.ancho(p.cantidad, maxPerd)"/></div>
+            </div>
+        </div>
+
+        <div class="o_fin_card">
+            <div class="o_fin_card_titulo">Tiempo a primer contacto (h hábiles)</div>
+            <table class="table table-sm o_fin_tabla mb-0">
+                <thead><tr><th>Vendedora</th><th class="text-end"><t t-out="d.etiqueta"/></th><th class="text-end"><t t-out="d.etiqueta_ant"/></th></tr></thead>
+                <tbody>
+                    <tr t-foreach="d.tiempos" t-as="t" t-key="t_index">
+                        <td t-out="t.nombre"/>
+                        <td class="text-end fw-bold" t-out="this.horas(t.actual)"/>
+                        <td class="text-end text-muted" t-out="this.horas(t.anterior)"/>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="o_fin_card o_fin_card_ancha" t-if="d.es_admin and d.ranking.length">
+            <div class="o_fin_card_titulo">Ranking de vendedoras</div>
+            <div class="table-responsive">
+                <table class="table table-sm o_fin_tabla mb-0">
+                    <thead><tr><th>#</th><th>Vendedora</th><th class="text-end">Nuevas</th><th class="text-end">Ganadas</th>
+                        <th class="text-end">Importe</th><th class="text-end">Conversión</th><th class="text-end">1er contacto</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="d.ranking" t-as="r" t-key="r.id">
+                            <td t-out="r_index + 1"/>
+                            <td class="fw-semibold" t-out="r.nombre"/>
+                            <td class="text-end" t-out="r.nuevas"/>
+                            <td class="text-end" t-out="r.ganadas"/>
+                            <td class="text-end" t-out="this.gs(r.importe)"/>
+                            <td class="text-end" t-out="this.pct(r.conversion)"/>
+                            <td class="text-end" t-out="this.horas(r.tiempo_actual)"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</t>
+
+<!-- ============================ OBJETIVOS ============================ -->
+<t t-name="financiera_crm.PanelObjetivos">
+    <t t-set="d" t-value="this.state.datos"/>
+    <div class="o_fin_card o_fin_card_ancha">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <div class="o_fin_card_titulo mb-0">Cumplimiento por vendedora y producto</div>
+            <div class="small text-muted">
+                Días hábiles: <b t-out="d.transcurridos"/> de <t t-out="d.dias_mes"/> ·
+                <label t-if="d.es_admin" class="ms-1">
+                    <input type="checkbox" t-att-checked="d.tope" t-on-change="(ev) => this.cambiarTope(ev)"/>
+                    Topear cada producto en 100 % en el promedio
+                </label>
+                <span t-elif="d.tope">Promedio con tope 100 % por producto</span>
+            </div>
+        </div>
+        <div t-if="!d.filas.length" class="o_fin_vacio">No hay objetivos cargados para este mes.</div>
+        <div class="table-responsive" t-if="d.filas.length">
+            <table class="table o_fin_tabla o_fin_tabla_objetivos mb-0">
+                <thead>
+                    <tr>
+                        <th>Vendedora</th>
+                        <th t-foreach="d.productos" t-as="p" t-key="p.producto" class="text-center" t-out="p.nombre"/>
+                        <th class="text-center">Promedio</th>
+                        <th class="text-center">Unificado</th>
+                        <th class="text-center">Proyección</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="d.filas" t-as="f" t-key="f.id">
+                        <td class="fw-semibold" t-out="f.nombre"/>
+                        <td t-foreach="f.celdas" t-as="c" t-key="c.producto" class="text-center">
+                            <div t-attf-class="o_fin_celda o_fin_celda_#{c.semaforo or 'vacio'}">
+                                <div class="o_fin_celda_pct" t-out="c.meta ? this.pct(c.pct) : '—'"/>
+                                <div class="small"><t t-out="c.logrado"/> / <t t-out="c.meta"/></div>
+                                <div class="small text-muted" t-if="c.meta">proy. <t t-out="c.proyeccion"/></div>
+                            </div>
+                        </td>
+                        <td class="text-center"><span t-attf-class="o_fin_pill o_fin_pill_#{this.semaforoPct(f.promedio)}" t-out="this.pct(f.promedio)"/></td>
+                        <td class="text-center"><span t-attf-class="o_fin_pill o_fin_pill_#{this.semaforoPct(f.unificado)}" t-out="this.pct(f.unificado)"/></td>
+                        <td class="text-center"><t t-out="f.proyeccion_total"/> / <t t-out="f.meta_total"/></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="small text-muted mt-2">
+            <b>Promedio</b>: promedio simple de los % por producto. <b>Unificado</b>: suma de logrados / suma de metas.
+            <b>Proyección</b>: logrado / días hábiles transcurridos × días hábiles del mes.
+        </div>
+    </div>
+</t>
+
+</templates>

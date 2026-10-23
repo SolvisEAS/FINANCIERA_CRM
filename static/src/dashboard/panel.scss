@@ -1,0 +1,175 @@
+.o_fin_panel {
+    overflow-y: auto;
+    padding: 1.25rem;
+    background: #f5f7fa;
+    height: 100%;
+
+    .o_fin_panel_cabecera {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: .75rem;
+        margin-bottom: 1rem;
+        h2 { font-weight: 700; color: #0f172a; }
+    }
+    .o_fin_filtros {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem;
+        .form-select, .form-control { width: auto; min-width: 9rem; border-radius: 8px; }
+    }
+    .o_fin_cargando, .o_fin_vacio { color: #6b7280; padding: 1rem 0; text-align: center; }
+
+    .o_fin_kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: .75rem;
+        margin-bottom: 1rem;
+    }
+    .o_fin_kpi {
+        background: #fff;
+        border-radius: 14px;
+        padding: .9rem 1rem;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+        cursor: pointer;
+        transition: transform .1s ease, box-shadow .1s ease;
+        border-top: 3px solid #0B5F7A;
+        &:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, .1); }
+        .o_fin_kpi_valor { font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1.1; }
+        .o_fin_kpi_valor_chico { font-size: 1.35rem; padding: .3rem 0; }
+        .o_fin_kpi_label { color: #6b7280; font-size: .85rem; }
+        &.o_fin_kpi_alerta { border-top-color: #F59E0B; }
+        &.o_fin_kpi_rojo { border-top-color: #DC2626; .o_fin_kpi_valor { color: #DC2626; } }
+        &.o_fin_kpi_ok { border-top-color: #16A34A; }
+    }
+    .o_fin_sube { color: #16A34A; font-weight: 600; }
+    .o_fin_baja { color: #DC2626; font-weight: 600; }
+    .o_fin_neutro { color: #6b7280; }
+
+    .o_fin_grilla {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: .75rem;
+    }
+    .o_fin_card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+        min-width: 0;
+    }
+    .o_fin_card_ancha { grid-column: 1 / -1; }
+    .o_fin_card_titulo { font-weight: 700; margin-bottom: .75rem; color: #0f172a; }
+
+    .o_fin_tarea_fila {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .55rem .5rem;
+        border-radius: 10px;
+        border-bottom: 1px solid #f1f5f9;
+        .o_fin_tarea_hora { width: 3.2rem; flex: none; text-align: center; }
+        .o_fin_tarea_cuerpo { flex: 1; min-width: 0; cursor: pointer; }
+        &.o_fin_tarea_pc { background: #eff6ff; border-left: 4px solid #2563EB; }
+        &.o_fin_tarea_fila_vencida .o_fin_tarea_hora { color: #DC2626; }
+    }
+
+    .o_fin_lista_fila {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .4rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+    }
+
+    .o_fin_barra_fila { margin-bottom: .6rem; cursor: default; }
+    .o_fin_barra {
+        height: .55rem;
+        background: #eef2f7;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: .2rem;
+        &.o_fin_barra_doble { height: .45rem; }
+        &.o_fin_barra_anterior { margin-top: .15rem; }
+    }
+    .o_fin_barra_relleno { height: 100%; border-radius: 999px; background: #0B5F7A; }
+    .o_fin_relleno_verde { background: #16A34A; }
+    .o_fin_relleno_amarillo { background: #F59E0B; }
+    .o_fin_relleno_rojo { background: #DC2626; }
+    .o_fin_relleno_gris { background: #cbd5e1; }
+    .o_fin_relleno_prestamo { background: #2563EB; }
+    .o_fin_relleno_tarjeta { background: #7C3AED; }
+    .o_fin_relleno_seguro { background: #059669; }
+    .o_fin_leyenda { display: inline-block; width: .7rem; height: .7rem; border-radius: 3px; vertical-align: middle; }
+
+    .o_fin_global, .o_fin_comparar {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-around;
+        text-align: center;
+        margin-top: .75rem;
+        padding-top: .75rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    .o_fin_comparar { border-top: 0; margin-top: 0; padding-top: 0; }
+    .o_fin_global_valor { font-size: 1.5rem; font-weight: 700; color: #0B5F7A; }
+
+    .o_fin_embudo_fila {
+        display: grid;
+        grid-template-columns: minmax(7rem, 11rem) 1fr auto;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: .45rem;
+        cursor: pointer;
+        font-size: .85rem;
+    }
+    .o_fin_embudo_barra { background: #eef2f7; border-radius: 8px; height: 1.4rem; overflow: hidden; }
+    .o_fin_embudo_relleno {
+        height: 100%;
+        min-width: 1.6rem;
+        background: linear-gradient(90deg, #0B5F7A, #1d8fae);
+        color: #fff;
+        font-weight: 600;
+        font-size: .75rem;
+        display: flex;
+        align-items: center;
+        padding-left: .45rem;
+        border-radius: 8px;
+    }
+    .o_fin_embudo_importe { color: #6b7280; white-space: nowrap; }
+
+    .o_fin_tabla th { color: #6b7280; font-weight: 600; font-size: .8rem; }
+    .o_fin_tabla_objetivos td { vertical-align: middle; }
+    .o_fin_celda {
+        border-radius: 10px;
+        padding: .4rem;
+        min-width: 6rem;
+        .o_fin_celda_pct { font-size: 1.15rem; font-weight: 700; }
+        &.o_fin_celda_verde { background: #dcfce7; color: #166534; }
+        &.o_fin_celda_amarillo { background: #fef3c7; color: #92400e; }
+        &.o_fin_celda_rojo { background: #fee2e2; color: #991b1b; }
+        &.o_fin_celda_vacio { background: #f1f5f9; color: #6b7280; }
+    }
+    .o_fin_pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: .15rem .6rem;
+        font-weight: 700;
+        &.o_fin_pill_verde { background: #dcfce7; color: #166534; }
+        &.o_fin_pill_amarillo { background: #fef3c7; color: #92400e; }
+        &.o_fin_pill_rojo { background: #fee2e2; color: #991b1b; }
+    }
+}
+
+@media (max-width: 767.98px) {
+    .o_fin_panel {
+        padding: .75rem;
+        .o_fin_kpis { grid-template-columns: repeat(2, 1fr); }
+        .o_fin_kpi .o_fin_kpi_valor { font-size: 1.6rem; }
+        .o_fin_grilla { grid-template-columns: 1fr; }
+        .o_fin_embudo_fila { grid-template-columns: 6.5rem 1fr auto; }
+    }
+}

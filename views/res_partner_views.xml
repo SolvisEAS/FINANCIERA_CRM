@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_contacto_form" model="ir.ui.view">
+        <field name="name">financiera.contacto.form</field>
+        <field name="model">res.partner</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <form string="Contacto" class="o_fin_form">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_fin_oportunidades" type="object" class="oe_stat_button" icon="handshake">
+                            <field name="opportunity_count" widget="statinfo" string="Oportunidades"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nombre completo" required="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Datos">
+                            <field name="fin_ci"/>
+                            <field name="phone" widget="phone" string="Teléfono / WhatsApp"/>
+                            <field name="email" widget="email"/>
+                        </group>
+                        <group string="Más">
+                            <field name="city" string="Ciudad"/>
+                            <field name="fin_fecha_nacimiento"/>
+                            <field name="fin_origen"/>
+                            <field name="fin_es_cliente" invisible="1"/>
+                        </group>
+                    </group>
+                    <separator string="Historial de WhatsApp"/>
+                    <field name="fin_whatsapp_ids" readonly="1" nolabel="1">
+                        <list>
+                            <field name="fecha"/>
+                            <field name="lead_id"/>
+                            <field name="mensajes"/>
+                            <field name="entrantes"/>
+                            <field name="salientes"/>
+                        </list>
+                        <form>
+                            <group>
+                                <field name="fecha"/>
+                                <field name="lead_id"/>
+                            </group>
+                            <field name="contenido"/>
+                        </form>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_contacto_list" model="ir.ui.view">
+        <field name="name">financiera.contacto.list</field>
+        <field name="model">res.partner</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Contactos">
+                <field name="name" string="Nombre"/>
+                <field name="fin_ci"/>
+                <field name="phone" string="Teléfono"/>
+                <field name="email"/>
+                <field name="city" string="Ciudad"/>
+                <field name="fin_origen"/>
+                <field name="opportunity_count" string="Oportunidades"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_contacto_kanban" model="ir.ui.view">
+        <field name="name">financiera.contacto.kanban</field>
+        <field name="model">res.partner</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <kanban class="o_fin_kanban_contactos">
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold"/>
+                        <field name="phone"/>
+                        <field name="city" class="text-muted small"/>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_contacto_search" model="ir.ui.view">
+        <field name="name">financiera.contacto.search</field>
+        <field name="model">res.partner</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Nombre"/>
+                <field name="phone" string="Teléfono" filter_domain="['|', ('phone', 'ilike', self), ('fin_telefono_e164', 'ilike', self)]"/>
+                <field name="fin_ci"/>
+                <field name="email"/>
+                <filter name="origen_meta" string="Meta" domain="[('fin_origen', '=', 'meta')]"/>
+                <filter name="origen_wa" string="WhatsApp" domain="[('fin_origen', '=', 'whatsapp')]"/>
+                <group>
+                    <filter name="group_origen" string="Origen" context="{'group_by': 'fin_origen'}"/>
+                    <filter name="group_ciudad" string="Ciudad" context="{'group_by': 'city'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_contactos" model="ir.actions.act_window">
+        <field name="name">Contactos</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('fin_es_cliente', '=', True), ('user_ids', '=', False)]</field>
+        <field name="context">{'default_fin_es_cliente': True, 'fin_cliente': True, 'default_is_company': False}</field>
+        <field name="search_view_id" ref="view_contacto_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_contacto_list')}),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_contacto_kanban')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_contacto_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Todavía no hay contactos</p>
+            <p>Los contactos se crean solos cuando entra una oportunidad por Meta, WhatsApp o importación.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Título de la pestaña y login sin la marca de Odoo -->
+    <template id="layout_titulo" inherit_id="web.layout" name="Financiera: título">
+        <xpath expr="//title" position="replace">
+            <title t-out="title or 'CRM Financiera'"/>
+        </xpath>
+    </template>
+
+    <template id="login_layout_sin_marca" inherit_id="web.login_layout" name="Financiera: login sin marca">
+        <xpath expr="//a[contains(@href, 'utm_medium=auth')]" position="replace">
+            <span class="text-muted small">CRM Financiera</span>
+        </xpath>
+    </template>
+</odoo>

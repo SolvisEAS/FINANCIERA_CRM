@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_config_form" model="ir.ui.view">
+        <field name="name">financiera.config.form</field>
+        <field name="model">financiera.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuración" class="o_fin_form" create="0" delete="0">
+                <header>
+                    <button name="action_simular_meta" type="object" string="Simular lead de Meta" class="btn-secondary"/>
+                    <button name="action_simular_whatsapp" type="object" string="Simular WhatsApp entrante" class="btn-secondary"/>
+                    <button name="action_cargar_demo" type="object" string="Recargar datos de demo" class="btn-secondary"
+                            confirm="Se borran los datos de demo actuales y se vuelven a generar. ¿Seguir?"/>
+                    <button name="action_borrar_demo" type="object" string="Borrar datos de demo" class="btn-outline-danger"
+                            confirm="Se borran todas las oportunidades, contactos y objetivos marcados como demo. ¿Seguir?"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1>Administración del CRM</h1></div>
+                    <group>
+                        <group string="Asignación automática">
+                            <field name="modo_asignacion" widget="radio"/>
+                            <field name="ultimo_asignado_id"/>
+                            <field name="equipo_id"/>
+                        </group>
+                        <group string="Horario y tareas">
+                            <field name="calendario_id"/>
+                            <field name="zona_horaria"/>
+                            <field name="hora_inicio" widget="float_time"/>
+                            <field name="sla_horas" widget="float_time"/>
+                            <field name="escalonar_max_bloque"/>
+                            <field name="tope_diario_tareas"/>
+                            <field name="intentos_max"/>
+                        </group>
+                        <group string="Objetivos y avisos">
+                            <field name="tope_100_promedio"/>
+                            <field name="notificar_email"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Meta Lead Ads" name="meta">
+                            <group>
+                                <group>
+                                    <field name="meta_url_webhook" readonly="1" widget="CopyClipboardChar"/>
+                                    <field name="meta_verify_token" password="True"/>
+                                    <field name="meta_access_token" password="True"/>
+                                    <field name="meta_app_secret" password="True"/>
+                                </group>
+                                <group>
+                                    <field name="meta_graph_version"/>
+                                    <field name="meta_ultimo_evento"/>
+                                    <button name="action_generar_tokens" type="object" string="Generar tokens faltantes"
+                                            class="btn-link" colspan="2"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="WhatsApp" name="whatsapp">
+                            <group>
+                                <field name="whatsapp_url" readonly="1" widget="CopyClipboardChar"/>
+                                <field name="whatsapp_token" password="True"/>
+                            </group>
+                            <p class="text-muted">El puente de WhatsApp QR envía cada mensaje a esta URL con el header
+                                <code>X-Financiera-Token</code>. El estado de conexión por vendedora está en
+                                Administración → WhatsApp por vendedora.</p>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_config" model="ir.actions.act_window">
+        <field name="name">Configuración</field>
+        <field name="res_model">financiera.config</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="config_principal"/>
+    </record>
+
+    <!-- Calendario laboral, feriados, etapas y motivos -->
+    <record id="action_calendario" model="ir.actions.act_window">
+        <field name="name">Calendario laboral</field>
+        <field name="res_model">resource.calendar</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="calendario_financiera"/>
+    </record>
+
+    <record id="view_feriado_list" model="ir.ui.view">
+        <field name="name">financiera.feriado.list</field>
+        <field name="model">resource.calendar.leaves</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Feriados" editable="bottom" default_order="date_from">
+                <field name="name" string="Feriado"/>
+                <field name="date_from" string="Desde"/>
+                <field name="date_to" string="Hasta"/>
+                <field name="calendar_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_feriados" model="ir.actions.act_window">
+        <field name="name">Feriados</field>
+        <field name="res_model">resource.calendar.leaves</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('resource_id', '=', False)]</field>
+        <field name="context" eval="str({'default_calendar_id': ref('calendario_financiera')})"/>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_feriado_list')})]"/>
+    </record>
+
+    <record id="view_etapa_list" model="ir.ui.view">
+        <field name="name">financiera.etapa.list</field>
+        <field name="model">crm.stage</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Etapas" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="fin_codigo"/>
+                <field name="name"/>
+                <field name="is_won" string="Ganada"/>
+                <field name="fin_es_perdido"/>
+                <field name="fold" string="Plegada"/>
+                <field name="requirements" string="Regla"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_etapas" model="ir.actions.act_window">
+        <field name="name">Etapas</field>
+        <field name="res_model">crm.stage</field>
+        <field name="view_mode">list</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_etapa_list')})]"/>
+    </record>
+
+    <record id="view_motivo_list" model="ir.ui.view">
+        <field name="name">financiera.motivo.list</field>
+        <field name="model">crm.lost.reason</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Motivos de pérdida" editable="bottom">
+                <field name="name" string="Motivo"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_motivos" model="ir.actions.act_window">
+        <field name="name">Motivos de pérdida</field>
+        <field name="res_model">crm.lost.reason</field>
+        <field name="view_mode">list</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_motivo_list')})]"/>
+    </record>
+</odoo>

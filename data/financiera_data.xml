@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Calendario laboral: lunes a viernes 08:00–12:00 y 14:00–18:00 (8 h hábiles por día) -->
+    <record id="calendario_financiera" model="resource.calendar">
+        <field name="name">Horario financiera (L a V, 08:00–18:00)</field>
+        <field name="attendance_ids" eval="[(5, 0, 0)] + [
+            (0, 0, {'dayofweek': str(d), 'hour_from': h_from, 'hour_to': h_to})
+            for d in range(5) for (h_from, h_to) in ((8.0, 12.0), (14.0, 18.0))]"/>
+    </record>
+
+    <record id="equipo_financiera" model="crm.team">
+        <field name="name">Financiera</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="config_principal" model="financiera.config">
+        <field name="name">Configuración</field>
+        <field name="modo_asignacion">rotacion</field>
+        <field name="hora_inicio">8.5</field>
+        <field name="sla_horas">1.0</field>
+    </record>
+
+    <!-- Etapas -->
+    <record id="stage_00" model="crm.stage">
+        <field name="name">00 · No contactado</field>
+        <field name="fin_codigo">00</field>
+        <field name="sequence">0</field>
+        <field name="requirements">Etapa donde nacen todas las oportunidades.</field>
+    </record>
+    <record id="stage_10" model="crm.stage">
+        <field name="name">10 · Contactado</field>
+        <field name="fin_codigo">10</field>
+        <field name="sequence">10</field>
+        <field name="requirements">Hubo un intento de contacto, haya respondido o no.</field>
+    </record>
+    <record id="stage_20" model="crm.stage">
+        <field name="name">20 · Necesita información</field>
+        <field name="fin_codigo">20</field>
+        <field name="sequence">20</field>
+        <field name="requirements">El cliente respondió y pide datos o requisitos.</field>
+    </record>
+    <record id="stage_30" model="crm.stage">
+        <field name="name">30 · Negociación</field>
+        <field name="fin_codigo">30</field>
+        <field name="sequence">30</field>
+        <field name="requirements">Condiciones, documentación y aprobación.</field>
+    </record>
+    <record id="stage_40" model="crm.stage">
+        <field name="name">40 · Cerrado ganado</field>
+        <field name="fin_codigo">40</field>
+        <field name="sequence">40</field>
+        <field name="is_won" eval="True"/>
+        <field name="fold" eval="True"/>
+        <field name="requirements">Requiere importe final.</field>
+    </record>
+    <record id="stage_50" model="crm.stage">
+        <field name="name">50 · Cerrado perdido</field>
+        <field name="fin_codigo">50</field>
+        <field name="sequence">50</field>
+        <field name="fin_es_perdido" eval="True"/>
+        <field name="fold" eval="True"/>
+        <field name="requirements">Requiere motivo de pérdida.</field>
+    </record>
+
+    <!-- Motivos de pérdida -->
+    <record id="motivo_no_califica" model="crm.lost.reason"><field name="name">No califica (ingresos/score)</field></record>
+    <record id="motivo_no_responde" model="crm.lost.reason"><field name="name">No responde tras varios intentos</field></record>
+    <record id="motivo_otra_entidad" model="crm.lost.reason"><field name="name">Eligió otra entidad</field></record>
+    <record id="motivo_tasa" model="crm.lost.reason"><field name="name">Tasa / condiciones</field></record>
+    <record id="motivo_desistio" model="crm.lost.reason"><field name="name">Desistió</field></record>
+    <record id="motivo_datos_invalidos" model="crm.lost.reason"><field name="name">Datos inválidos</field></record>
+
+    <!-- Tipos de tarea -->
+    <record id="actividad_primer_contacto" model="mail.activity.type">
+        <field name="name">Primer contacto</field>
+        <field name="icon">call</field>
+        <field name="decoration_type">warning</field>
+        <field name="res_model">crm.lead</field>
+        <field name="sequence">1</field>
+    </record>
+    <record id="actividad_seguimiento" model="mail.activity.type">
+        <field name="name">Seguimiento</field>
+        <field name="icon">event_repeat</field>
+        <field name="res_model">crm.lead</field>
+        <field name="sequence">2</field>
+    </record>
+    <record id="actividad_documentacion" model="mail.activity.type">
+        <field name="name">Documentación</field>
+        <field name="icon">description</field>
+        <field name="res_model">crm.lead</field>
+        <field name="sequence">3</field>
+    </record>
+    <record id="actividad_resumen_whatsapp" model="mail.activity.type">
+        <field name="name">Resumen WhatsApp</field>
+        <field name="icon">chat</field>
+        <field name="res_model">crm.lead</field>
+        <field name="sequence">4</field>
+    </record>
+
+    <!-- Mapeo inicial de preguntas de Meta -->
+    <record id="mapeo_nombre" model="financiera.meta.mapeo"><field name="pregunta">full_name</field><field name="campo">nombre</field><field name="sequence">1</field></record>
+    <record id="mapeo_telefono" model="financiera.meta.mapeo"><field name="pregunta">phone_number</field><field name="campo">telefono</field><field name="sequence">2</field></record>
+    <record id="mapeo_email" model="financiera.meta.mapeo"><field name="pregunta">email</field><field name="campo">email</field><field name="sequence">3</field></record>
+    <record id="mapeo_producto" model="financiera.meta.mapeo"><field name="pregunta">producto_interes</field><field name="campo">producto</field><field name="sequence">4</field></record>
+    <record id="mapeo_monto" model="financiera.meta.mapeo"><field name="pregunta">monto</field><field name="campo">importe</field><field name="sequence">5</field></record>
+    <record id="mapeo_ciudad" model="financiera.meta.mapeo"><field name="pregunta">ciudad</field><field name="campo">ciudad</field><field name="sequence">6</field></record>
+    <record id="mapeo_ci" model="financiera.meta.mapeo"><field name="pregunta">cedula</field><field name="campo">ci</field><field name="sequence">7</field></record>
+</odoo>

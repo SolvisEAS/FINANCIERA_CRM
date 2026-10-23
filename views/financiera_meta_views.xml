@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_meta_mapeo_list" model="ir.ui.view">
+        <field name="name">financiera.meta.mapeo.list</field>
+        <field name="model">financiera.meta.mapeo</field>
+        <field name="arch" type="xml">
+            <list string="Mapeo de Meta" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="pregunta"/>
+                <field name="campo"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_meta_mapeo" model="ir.actions.act_window">
+        <field name="name">Meta: mapeo de campos</field>
+        <field name="res_model">financiera.meta.mapeo</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_meta_lead_list" model="ir.ui.view">
+        <field name="name">financiera.meta.lead.list</field>
+        <field name="model">financiera.meta.lead</field>
+        <field name="arch" type="xml">
+            <list string="Leads de Meta" create="0" decoration-danger="estado == 'error'" decoration-muted="estado == 'duplicado'">
+                <field name="create_date" string="Recibido"/>
+                <field name="leadgen_id"/>
+                <field name="campana"/>
+                <field name="estado" widget="badge" decoration-success="estado == 'procesado'" decoration-danger="estado == 'error'"/>
+                <field name="intentos"/>
+                <field name="lead_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_meta_lead_form" model="ir.ui.view">
+        <field name="name">financiera.meta.lead.form</field>
+        <field name="model">financiera.meta.lead</field>
+        <field name="arch" type="xml">
+            <form string="Lead de Meta" create="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="leadgen_id"/>
+                            <field name="form_id"/>
+                            <field name="ad_id"/>
+                            <field name="campana"/>
+                        </group>
+                        <group>
+                            <field name="estado"/>
+                            <field name="intentos"/>
+                            <field name="lead_id"/>
+                            <field name="error" invisible="not error"/>
+                        </group>
+                    </group>
+                    <separator string="Payload"/>
+                    <field name="payload"/>
+                    <separator string="Respuesta de Graph API" invisible="not respuesta"/>
+                    <field name="respuesta" invisible="not respuesta"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_meta_leads" model="ir.actions.act_window">
+        <field name="name">Meta: leads recibidos</field>
+        <field name="res_model">financiera.meta.lead</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,19 @@
+id,name,model_id,group_id/id,operation,domain
+fin_restr_lead_vendedora,Vendedora: solo sus oportunidades,crm.lead,,crud,"[('user_id', '=', user.id)] if user.fin_solo_propias else []"
+fin_restr_partner_vendedora,Vendedora: solo sus contactos,res.partner,,crud,"['|', '|', ('fin_es_cliente', '=', False), ('create_uid', '=', user.id), ('opportunity_ids.user_id', '=', user.id)] if user.fin_solo_propias else []"
+fin_restr_activity_vendedora,Vendedora: solo sus tareas,mail.activity,,crud,"['|', ('user_id', '=', user.id), ('res_model', '!=', 'crm.lead')] if user.fin_solo_propias else []"
+fin_objetivo_vendedora,Objetivos: vendedora lee los suyos,financiera.objetivo,group_vendedora,r,"[('user_id', '=', user.id)]"
+fin_objetivo_admin,Objetivos: admin,financiera.objetivo,group_admin,crud,
+fin_config_vendedora,Configuración: lectura,financiera.config,group_vendedora,r,
+fin_config_admin,Configuración: admin,financiera.config,group_admin,crud,
+fin_meta_mapeo_admin,Mapeo Meta: admin,financiera.meta.mapeo,group_admin,crud,
+fin_meta_lead_admin,Cola Meta: admin,financiera.meta.lead,group_admin,crud,
+fin_wa_resumen_vendedora,Resumen WhatsApp: vendedora,financiera.whatsapp.resumen,group_vendedora,r,
+fin_wa_resumen_admin,Resumen WhatsApp: admin,financiera.whatsapp.resumen,group_admin,crud,
+fin_concluir_wizard,Asistente concluir,financiera.concluir.wizard,group_vendedora,crud,
+fin_cierre_wizard,Asistente cierre,financiera.cierre.wizard,group_vendedora,crud,
+fin_reasignar_wizard,Asistente reasignar,financiera.reasignar.wizard,group_admin,crud,
+fin_importar_wizard,Asistente importar,financiera.importar.wizard,group_admin,crud,
+fin_calendar_admin,Calendario laboral: admin,resource.calendar,group_admin,crud,
+fin_calendar_att_admin,Horario: admin,resource.calendar.attendance,group_admin,crud,
+fin_calendar_leaves_admin,Feriados: admin,resource.calendar.leaves,group_admin,crud,

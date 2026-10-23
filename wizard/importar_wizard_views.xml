@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_importar_wizard_form" model="ir.ui.view">
+        <field name="name">financiera.importar.wizard.form</field>
+        <field name="model">financiera.importar.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar oportunidades">
+                <p>Cargá la plantilla con una oportunidad por fila. Los teléfonos se normalizan (+595…),
+                    los contactos existentes se reutilizan y, si la columna Vendedora está vacía, se asigna por rotación.
+                    Cada oportunidad nace con su tarea de primer contacto.</p>
+                <group>
+                    <field name="archivo" filename="nombre_archivo"/>
+                    <field name="nombre_archivo" invisible="1"/>
+                </group>
+                <field name="resultado" invisible="not resultado" readonly="1"/>
+                <footer>
+                    <button name="action_importar" type="object" string="Importar" class="btn-primary" data-hotkey="q"/>
+                    <button name="action_descargar_plantilla" type="object" string="Descargar plantilla" class="btn-secondary"/>
+                    <button string="Cerrar" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_importar" model="ir.actions.act_window">
+        <field name="name">Importar oportunidades</field>
+        <field name="res_model">financiera.importar.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

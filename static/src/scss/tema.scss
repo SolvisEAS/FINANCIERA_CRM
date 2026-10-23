@@ -1,0 +1,128 @@
+// Tema liviano tipo Zoho: más aire, bordes redondeados, sombras suaves
+$fin-primario: #0B5F7A;
+$fin-prestamo: #2563EB;
+$fin-tarjeta: #7C3AED;
+$fin-seguro: #059669;
+$fin-sin-definir: #D97706;
+$fin-rojo: #DC2626;
+$fin-amarillo: #F59E0B;
+$fin-verde: #16A34A;
+
+.o_fin_form {
+    .o_form_sheet {
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+        padding-top: 1.25rem;
+    }
+    .o_group .o_horizontal_separator, .o_group > .o_inner_group > tbody > tr > td > .o_horizontal_separator {
+        color: $fin-primario;
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+    .o_inner_group .o_cell { padding-bottom: .35rem; }
+    .btn { border-radius: 10px; }
+    .o_statusbar_buttons .btn { padding: .45rem .9rem; }
+    .o_fin_btn_wa { background: #25D366; color: #fff; border-color: #25D366; }
+    .o_fin_btn_wa:hover { background: #1ebe5b; color: #fff; }
+}
+
+// Cabecera de la oportunidad
+.o_fin_cabecera {
+    padding: .25rem 0 1rem;
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    margin-bottom: 1rem;
+    .o_fin_cabecera_importe { font-size: 1.15rem; font-weight: 600; color: $fin-primario; }
+    .o_fin_semaforo_texto { font-size: .85rem; color: #6b7280; }
+}
+
+// Chatter: dejar solo lo que usa la vendedora
+.o_fin_form_oportunidad ~ .o-mail-ChatterContainer, .o_fin_form_oportunidad .o-mail-Chatter {
+    .o-mail-Followers, .o-mail-Chatter-follow { display: none !important; }
+}
+
+// Badges de producto
+.o_fin_badge {
+    display: inline-block;
+    padding: .1rem .5rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #fff;
+    background: #9ca3af;
+    .o_field_widget, span { color: inherit !important; }
+    &.o_fin_badge_prestamo { background: $fin-prestamo; }
+    &.o_fin_badge_tarjeta { background: $fin-tarjeta; }
+    &.o_fin_badge_seguro { background: $fin-seguro; }
+    &.o_fin_badge_sin_definir { background: $fin-sin-definir; }
+}
+
+// Kanban
+.o_fin_kanban {
+    .o_kanban_record {
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .08);
+        border: 1px solid #eef0f3;
+    }
+    .o_fin_kanban_importe { font-weight: 600; color: #374151; margin: .15rem 0; }
+    .o_kanban_group .o_column_title { font-weight: 600; }
+}
+
+.o_fin_tarea {
+    font-size: .78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    padding: .05rem .4rem;
+    border-radius: 6px;
+    &.o_fin_tarea_vencida { background: #fee2e2; color: $fin-rojo; font-weight: 600; }
+    &.o_fin_tarea_hoy { background: #fef3c7; color: #92400e; }
+    &.o_fin_tarea_futura { background: #ecfdf5; color: #065f46; }
+    &.o_fin_tarea_sin { background: #fee2e2; color: $fin-rojo; }
+}
+
+.o_fin_semaforo {
+    display: inline-block;
+    width: .7rem;
+    height: .7rem;
+    border-radius: 50%;
+    flex: none;
+    background: #d1d5db;
+    &.o_fin_semaforo_verde { background: $fin-verde; }
+    &.o_fin_semaforo_amarillo { background: $fin-amarillo; }
+    &.o_fin_semaforo_rojo { background: $fin-rojo; }
+}
+
+.o_fin_aviso_wa {
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 600;
+    color: #166534;
+    background: #dcfce7;
+    border-radius: 6px;
+    padding: .05rem .4rem;
+    margin: .15rem 0;
+}
+
+// Bandeja de tareas
+.o_fin_bandeja .o_group_name { font-weight: 700; }
+
+// Resúmenes de WhatsApp en el historial
+.o_fin_resumen_wa {
+    border-left: 3px solid #25D366;
+    padding-left: .6rem;
+    ul { padding-left: 1rem; font-size: .85rem; }
+}
+
+// Asistente de conclusión
+.o_fin_concluir {
+    .o_fin_conclusion .o_radio_item { margin-right: 1.25rem; padding: .35rem 0; }
+    .o_fin_proxima { background: #f8fafc; border-radius: 12px; padding: .25rem .75rem .5rem; }
+}
+
+// Celular: botones grandes y sin aire de más
+@media (max-width: 767.98px) {
+    .o_fin_form .o_statusbar_buttons .btn { padding: .55rem .8rem; }
+    .o_fin_cabecera h1 { font-size: 1.4rem; }
+}

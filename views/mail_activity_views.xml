@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tarea_list" model="ir.ui.view">
+        <field name="name">financiera.tarea.list</field>
+        <field name="model">mail.activity</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Tareas" create="0" default_order="fin_fecha_hora" class="o_fin_bandeja"
+                  decoration-danger="fin_bandeja == '1_vencida'" decoration-bf="fin_tipo == 'primer_contacto'">
+                <field name="fin_bandeja" column_invisible="1"/>
+                <field name="fin_tipo" column_invisible="1"/>
+                <field name="res_model" column_invisible="1"/>
+                <field name="fin_fecha_hora" string="Cuándo" widget="datetime" options="{'show_seconds': false}"/>
+                <field name="summary" string="Asunto"/>
+                <field name="fin_lead_id" string="Oportunidad" optional="show"/>
+                <field name="fin_producto" widget="badge" decoration-info="fin_producto == 'prestamo'"
+                       decoration-primary="fin_producto == 'tarjeta'" decoration-success="fin_producto == 'seguro'" optional="show"/>
+                <field name="fin_modalidad" string="Modalidad" optional="show"/>
+                <field name="fin_telefono" widget="phone" optional="hide"/>
+                <field name="user_id" widget="many2one_avatar_user" string="Vendedora" optional="show"/>
+                <button name="action_fin_concluir" type="object" string="Concluir" class="btn-primary btn-sm"/>
+                <button name="action_fin_abrir_oportunidad" type="object" string="Abrir" class="btn-link btn-sm"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tarea_form" model="ir.ui.view">
+        <field name="name">financiera.tarea.form</field>
+        <field name="model">mail.activity</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <form string="Tarea" class="o_fin_form">
+                <sheet>
+                    <field name="res_model_id" invisible="1"/>
+                    <field name="res_model" invisible="1"/>
+                    <field name="res_id" invisible="1"/>
+                    <field name="activity_type_id" invisible="1"/>
+                    <field name="date_deadline" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="summary" string="Asunto" required="1"/>
+                            <field name="fin_fecha_hora" required="1" options="{'show_seconds': false}"/>
+                            <field name="fin_modalidad" required="1"/>
+                            <field name="fin_tipo" required="1"/>
+                        </group>
+                        <group>
+                            <field name="fin_recordatorio"/>
+                            <field name="fin_recordatorio_canal" invisible="fin_recordatorio == 'no'"/>
+                            <field name="user_id" string="Vendedora" groups="financiera_crm.group_admin"/>
+                            <field name="fin_lead_id" string="Oportunidad" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Detalle de la tarea…"/>
+                </sheet>
+                <footer>
+                    <button string="Guardar" special="save" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tarea_search" model="ir.ui.view">
+        <field name="name">financiera.tarea.search</field>
+        <field name="model">mail.activity</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="summary" string="Asunto"/>
+                <field name="fin_lead_id" string="Oportunidad"/>
+                <field name="user_id" string="Vendedora"/>
+                <filter name="mias" string="Mis tareas" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="vencidas" string="Vencidas" domain="[('fin_bandeja', '=', '1_vencida')]"/>
+                <filter name="hoy" string="Hoy" domain="[('fin_bandeja', '=', '2_hoy')]"/>
+                <filter name="proximas" string="Próximas" domain="[('fin_bandeja', '=', '3_proxima')]"/>
+                <separator/>
+                <filter name="primer_contacto" string="Primer contacto" domain="[('fin_tipo', '=', 'primer_contacto')]"/>
+                <group>
+                    <filter name="group_bandeja" string="Bandeja" context="{'group_by': 'fin_bandeja'}"/>
+                    <filter name="group_vendedora" string="Vendedora" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_modalidad" string="Modalidad" context="{'group_by': 'fin_modalidad'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tareas" model="ir.actions.act_window">
+        <field name="name">Tareas</field>
+        <field name="res_model">mail.activity</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('res_model', '=', 'crm.lead')]</field>
+        <field name="context">{'search_default_group_bandeja': 1, 'create': False}</field>
+        <field name="search_view_id" ref="view_tarea_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_tarea_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_tarea_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">¡No tenés tareas pendientes!</p>
+        </field>
+    </record>
+</odoo>

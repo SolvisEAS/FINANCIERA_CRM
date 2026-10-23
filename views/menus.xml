@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Paneles (acciones de cliente OWL) -->
+    <record id="action_mi_dia" model="ir.actions.client">
+        <field name="name">Mi día</field>
+        <field name="tag">financiera_panel</field>
+        <field name="params" eval="{'panel': 'mi_dia'}"/>
+    </record>
+    <record id="action_semana" model="ir.actions.client">
+        <field name="name">Esta semana vs. semana pasada</field>
+        <field name="tag">financiera_panel</field>
+        <field name="params" eval="{'panel': 'semana'}"/>
+    </record>
+    <record id="action_panel_objetivos" model="ir.actions.client">
+        <field name="name">Objetivos</field>
+        <field name="tag">financiera_panel</field>
+        <field name="params" eval="{'panel': 'objetivos'}"/>
+    </record>
+
+    <menuitem id="menu_raiz" name="CRM Financiera" sequence="1"
+              web_icon="financiera_crm,static/description/icon.png"
+              groups="financiera_crm.group_vendedora"/>
+
+    <menuitem id="menu_mi_dia" name="Mi día" parent="menu_raiz" action="action_mi_dia" sequence="1"/>
+    <menuitem id="menu_oportunidades" name="Oportunidades" parent="menu_raiz" action="action_oportunidades" sequence="2"/>
+    <menuitem id="menu_contactos" name="Contactos" parent="menu_raiz" action="action_contactos" sequence="3"/>
+    <menuitem id="menu_tareas" name="Tareas" parent="menu_raiz" action="action_tareas" sequence="4"/>
+
+    <menuitem id="menu_informes" name="Informes" parent="menu_raiz" sequence="5"/>
+    <menuitem id="menu_informe_semana" name="Esta semana vs. semana pasada" parent="menu_informes" action="action_semana" sequence="1"/>
+    <menuitem id="menu_informe_objetivos" name="Objetivos" parent="menu_informes" action="action_panel_objetivos" sequence="2"/>
+    <menuitem id="menu_informe_analisis" name="Análisis (gráfico y pivote)" parent="menu_informes" action="action_analisis" sequence="3"/>
+
+    <menuitem id="menu_admin" name="Administración" parent="menu_raiz" sequence="6" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_config" name="Configuración general" parent="menu_admin" action="action_config" sequence="1" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_vendedoras" name="Vendedoras y disponibilidad" parent="menu_admin" action="action_vendedoras" sequence="2" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_objetivos" name="Carga de objetivos" parent="menu_admin" action="action_objetivos" sequence="3" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_calendario" name="Calendario laboral" parent="menu_admin" action="action_calendario" sequence="4" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_feriados" name="Feriados" parent="menu_admin" action="action_feriados" sequence="5" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_etapas" name="Etapas" parent="menu_admin" action="action_etapas" sequence="6" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_motivos" name="Motivos de pérdida" parent="menu_admin" action="action_motivos" sequence="7" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_meta_mapeo" name="Meta: mapeo de campos" parent="menu_admin" action="action_meta_mapeo" sequence="8" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_meta_leads" name="Meta: leads recibidos" parent="menu_admin" action="action_meta_leads" sequence="9" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_whatsapp" name="WhatsApp por vendedora" parent="menu_admin" action="action_whatsapp_estado" sequence="10" groups="financiera_crm.group_admin"/>
+    <menuitem id="menu_admin_importar" name="Importar oportunidades" parent="menu_admin" action="action_importar" sequence="11" groups="financiera_crm.group_admin"/>
+</odoo>

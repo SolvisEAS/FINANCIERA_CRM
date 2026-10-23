@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_financiera" model="ir.module.category">
+        <field name="name">Financiera</field>
+        <field name="sequence">5</field>
+    </record>
+
+    <record id="privilege_financiera" model="res.groups.privilege">
+        <field name="name">CRM Financiera</field>
+        <field name="sequence">1</field>
+        <field name="category_id" ref="module_category_financiera"/>
+    </record>
+
+    <record id="group_vendedora" model="res.groups">
+        <field name="name">Vendedora</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="privilege_financiera"/>
+        <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        <field name="comment">Ve solo sus oportunidades, contactos, tareas y objetivos.</field>
+    </record>
+
+    <record id="group_admin" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="privilege_financiera"/>
+        <field name="implied_ids" eval="[(4, ref('group_vendedora')), (4, ref('sales_team.group_sale_manager'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Ve y edita todo: asignación, objetivos, etapas, configuración e informes del equipo.</field>
+    </record>
+
+    <!-- Grupo técnico sin usuarios: los menús de Odoo que no son del CRM se mueven acá
+         (ver hooks.py), así nadie los ve salvo que se agregue a mano. -->
+    <record id="group_menus_odoo" model="res.groups">
+        <field name="name">Menús técnicos de Odoo (oculto)</field>
+        <field name="sequence">90</field>
+        <field name="privilege_id" ref="privilege_financiera"/>
+    </record>
+</odoo>

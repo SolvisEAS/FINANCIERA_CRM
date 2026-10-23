@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_reasignar_wizard_form" model="ir.ui.view">
+        <field name="name">financiera.reasignar.wizard.form</field>
+        <field name="model">financiera.reasignar.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reasignar oportunidades">
+                <field name="lead_ids" invisible="1"/>
+                <p>Se van a reasignar <b><field name="cantidad" class="d-inline"/></b> oportunidad(es).
+                    Sus tareas abiertas pasan a la nueva vendedora.</p>
+                <group>
+                    <field name="user_id" options="{'no_create': True, 'no_open': True}"/>
+                </group>
+                <footer>
+                    <button name="action_confirmar" type="object" string="Reasignar" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

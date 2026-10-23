@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cierre_wizard_form" model="ir.ui.view">
+        <field name="name">financiera.cierre.wizard.form</field>
+        <field name="model">financiera.cierre.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cerrar oportunidad" class="o_fin_form">
+                <field name="lead_id" invisible="1"/>
+                <field name="tipo" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <group>
+                    <field name="importe_final" invisible="tipo != 'ganado'" required="tipo == 'ganado'"/>
+                    <field name="lost_reason_id" invisible="tipo != 'perdido'" required="tipo == 'perdido'"
+                           options="{'no_create': True}"/>
+                    <field name="nota" placeholder="Comentario (opcional)"/>
+                </group>
+                <footer>
+                    <button name="action_confirmar" type="object" string="Confirmar" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ======================= Kanban ======================= -->
+    <record id="view_oportunidad_kanban" model="ir.ui.view">
+        <field name="name">financiera.oportunidad.kanban</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_fin_kanban" quick_create="false" group_create="false"
+                    group_delete="false" group_edit="false" archivable="false" sample="1" default_order="create_date desc">
+                <field name="fin_producto"/>
+                <field name="fin_proxima_tarea_estado"/>
+                <field name="fin_proxima_tarea_fecha"/>
+                <field name="fin_semaforo"/>
+                <field name="fin_codigo_etapa"/>
+                <field name="fin_cliente_escribio"/>
+                <field name="fin_horas_sin_contactar"/>
+                <field name="company_currency"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex align-items-start justify-content-between gap-2">
+                            <field name="name" class="fw-bold fs-6 text-truncate"/>
+                            <span t-attf-class="o_fin_badge o_fin_badge_#{record.fin_producto.raw_value}">
+                                <field name="fin_producto"/>
+                            </span>
+                        </div>
+                        <div class="o_fin_kanban_importe">
+                            <field name="fin_importe_solicitado" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                        </div>
+                        <div t-if="record.fin_cliente_escribio.raw_value" class="o_fin_aviso_wa">
+                            <i class="oi" data-icon="chat" title="WhatsApp"/> El cliente escribió, respondé
+                        </div>
+                        <footer class="pt-1 mt-auto">
+                            <div t-attf-class="o_fin_tarea o_fin_tarea_#{record.fin_proxima_tarea_estado.raw_value}">
+                                <t t-if="record.fin_proxima_tarea_fecha.raw_value">
+                                    <i class="oi" data-icon="event" title="Próxima tarea"/>
+                                    <field name="fin_proxima_tarea_fecha" widget="datetime" options="{'show_seconds': false}"/>
+                                </t>
+                                <t t-elif="record.fin_codigo_etapa.raw_value != '40' and record.fin_codigo_etapa.raw_value != '50'">
+                                    <i class="oi" data-icon="warning" title="Sin tarea"/> Sin tarea
+                                </t>
+                            </div>
+                            <span t-if="record.fin_semaforo.raw_value" t-attf-class="o_fin_semaforo o_fin_semaforo_#{record.fin_semaforo.raw_value} ms-2"
+                                  t-att-title="'Sin contactar hace ' + record.fin_horas_sin_contactar.value + ' h hábiles'"/>
+                            <field name="user_id" widget="many2one_avatar_user" class="ms-auto" readonly="1"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ======================= Lista ======================= -->
+    <record id="view_oportunidad_list" model="ir.ui.view">
+        <field name="name">financiera.oportunidad.list</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Oportunidades" sample="1" default_order="create_date desc"
+                  decoration-danger="fin_proxima_tarea_estado == 'vencida'" decoration-muted="fin_cerrada">
+                <field name="fin_proxima_tarea_estado" column_invisible="1"/>
+                <field name="fin_cerrada" column_invisible="1"/>
+                <field name="company_currency" column_invisible="1"/>
+                <field name="name" string="Contacto"/>
+                <field name="phone" string="Teléfono" optional="show"/>
+                <field name="fin_producto" widget="badge" decoration-info="fin_producto == 'prestamo'"
+                       decoration-primary="fin_producto == 'tarjeta'" decoration-success="fin_producto == 'seguro'"/>
+                <field name="fin_importe_solicitado" sum="Total" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="stage_id" string="Etapa"/>
+                <field name="fin_origen" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" string="Vendedora"/>
+                <field name="create_date" string="Ingresó" optional="show"/>
+                <field name="fin_proxima_tarea_fecha" optional="show"/>
+                <field name="fin_proxima_tarea_asunto" optional="hide"/>
+                <field name="fin_horas_primer_contacto" optional="hide" avg="Promedio"/>
+                <field name="fin_importe_final" optional="hide" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ======================= Ficha ======================= -->
+    <record id="view_oportunidad_form" model="ir.ui.view">
+        <field name="name">financiera.oportunidad.form</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <form string="Oportunidad" class="o_fin_form o_fin_form_oportunidad">
+                <header>
+                    <button name="action_fin_nueva_tarea" string="Nueva tarea" type="object" class="btn-primary" invisible="fin_cerrada"/>
+                    <button name="action_fin_whatsapp" string="WhatsApp" type="object" class="o_fin_btn_wa"/>
+                    <button name="action_fin_ganado" string="Ganado" type="object" class="btn-success" invisible="fin_cerrada"/>
+                    <button name="action_fin_perdido" string="Perdido" type="object" class="btn-outline-danger" invisible="fin_cerrada"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
+                </header>
+                <sheet>
+                    <field name="fin_cerrada" invisible="1"/>
+                    <field name="fin_es_ganada" invisible="1"/>
+                    <field name="fin_es_perdida" invisible="1"/>
+                    <field name="fin_codigo_etapa" invisible="1"/>
+                    <field name="company_currency" invisible="1"/>
+                    <field name="type" invisible="1"/>
+                    <field name="fin_cliente_escribio" invisible="1"/>
+                    <field name="fin_vendedora_respondio_wa" invisible="1"/>
+                    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert" invisible="not fin_cliente_escribio">
+                        <i class="oi" data-icon="chat" title="WhatsApp"/> <b>El cliente escribió, respondé.</b>
+                    </div>
+                    <div class="alert alert-info d-flex align-items-center gap-2" role="alert"
+                         invisible="not fin_vendedora_respondio_wa or fin_codigo_etapa != '00'">
+                        Ya le respondiste por WhatsApp.
+                        <button name="action_fin_cerrar_primer_contacto" type="object" string="Cerrar primer contacto" class="btn btn-sm btn-primary"/>
+                    </div>
+                    <div class="o_fin_cabecera">
+                        <div class="o_fin_cabecera_titulo">
+                            <h1 class="mb-1"><field name="name" placeholder="Nombre del contacto"/></h1>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <field name="fin_producto" widget="badge" decoration-info="fin_producto == 'prestamo'"
+                                       decoration-primary="fin_producto == 'tarjeta'" decoration-success="fin_producto == 'seguro'"
+                                       decoration-warning="fin_producto == 'sin_definir'" readonly="1"/>
+                                <span class="o_fin_cabecera_importe">
+                                    <field name="fin_importe_solicitado" widget="monetary" readonly="1"
+                                           options="{'currency_field': 'company_currency'}"/>
+                                </span>
+                                <span class="o_fin_semaforo_texto" invisible="not fin_semaforo">
+                                    <field name="fin_semaforo" widget="badge" decoration-success="fin_semaforo == 'verde'"
+                                           decoration-warning="fin_semaforo == 'amarillo'" decoration-danger="fin_semaforo == 'rojo'"/>
+                                    sin contactar hace <field name="fin_horas_sin_contactar" widget="float_time" class="d-inline"/> h hábiles
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Cliente" name="cliente">
+                            <field name="partner_id" string="Contacto" required="1"
+                                   domain="[('fin_es_cliente', '=', True), ('user_ids', '=', False)]"
+                                   context="{'fin_cliente': True, 'default_fin_es_cliente': True,
+                                             'form_view_ref': 'financiera_crm.view_contacto_form'}"
+                                   options="{'no_create_edit': True}"/>
+                            <field name="phone" widget="phone" string="Teléfono / WhatsApp"/>
+                            <field name="email_from" widget="email" string="Email"/>
+                            <field name="fin_ci"/>
+                            <field name="fin_ciudad"/>
+                            <field name="fin_fecha_nacimiento"/>
+                        </group>
+                        <group string="Solicitud" name="solicitud">
+                            <field name="fin_producto" required="1"/>
+                            <field name="fin_importe_solicitado" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                            <field name="fin_plazo_meses" invisible="fin_producto != 'prestamo'"/>
+                            <field name="fin_vehiculo" invisible="fin_producto != 'seguro'"/>
+                            <field name="fin_ingreso_mensual" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                            <field name="fin_situacion_laboral"/>
+                            <field name="fin_importe_final" invisible="not fin_es_ganada" readonly="1"
+                                   widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                            <field name="lost_reason_id" invisible="not fin_es_perdida" readonly="1" string="Motivo de pérdida"/>
+                        </group>
+                        <group string="Seguimiento" name="seguimiento">
+                            <field name="fin_proxima_tarea_asunto" string="Próxima tarea"/>
+                            <field name="fin_proxima_tarea_fecha" string="Vence"/>
+                            <field name="fin_intentos"/>
+                            <field name="fin_fecha_primer_contacto"/>
+                            <field name="fin_horas_primer_contacto" string="Tiempo a primer contacto (h)"/>
+                        </group>
+                        <group string="Origen" name="origen">
+                            <field name="fin_origen"/>
+                            <field name="fin_campana" invisible="fin_origen != 'meta'"/>
+                            <field name="user_id" string="Vendedora" groups="financiera_crm.group_admin"
+                                   domain="[('fin_es_vendedora', '=', True)]" options="{'no_create': True}"/>
+                            <field name="user_id" string="Vendedora" readonly="1" groups="!financiera_crm.group_admin"/>
+                            <field name="date_open" string="Fecha de asignación"/>
+                            <field name="fin_asignado_por"/>
+                            <field name="create_date" string="Ingresó"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notas" name="notas">
+                            <field name="description" placeholder="Notas internas sobre el cliente…"/>
+                        </page>
+                        <page string="WhatsApp" name="whatsapp">
+                            <field name="fin_whatsapp_ids" readonly="1">
+                                <list>
+                                    <field name="fecha"/>
+                                    <field name="mensajes"/>
+                                    <field name="entrantes"/>
+                                    <field name="salientes"/>
+                                </list>
+                                <form>
+                                    <group><field name="fecha"/></group>
+                                    <field name="contenido"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Técnico" name="tecnico" groups="financiera_crm.group_admin" invisible="not fin_meta_payload">
+                            <field name="fin_meta_payload"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ======================= Búsqueda ======================= -->
+    <record id="view_oportunidad_search" model="ir.ui.view">
+        <field name="name">financiera.oportunidad.search</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <search string="Oportunidades">
+                <field name="name" string="Contacto" filter_domain="['|', '|', ('name', 'ilike', self), ('partner_id', 'ilike', self), ('phone', 'ilike', self)]"/>
+                <field name="phone" string="Teléfono"/>
+                <field name="fin_ci" string="CI"/>
+                <field name="user_id" string="Vendedora"/>
+                <field name="fin_campana"/>
+                <filter name="mias" string="Mis oportunidades" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="abiertas" string="Abiertas" domain="[('fin_cerrada', '=', False)]"/>
+                <filter name="sin_contactar" string="Sin contactar" domain="[('stage_id.fin_codigo', '=', '00')]"/>
+                <filter name="sin_tarea" string="Sin tarea futura" domain="[('fin_cerrada', '=', False), ('activity_ids', '=', False)]"/>
+                <filter name="ganadas" string="Ganadas" domain="[('fin_es_ganada', '=', True)]"/>
+                <filter name="perdidas" string="Perdidas" domain="[('fin_es_perdida', '=', True)]"/>
+                <separator/>
+                <filter name="prestamo" string="Préstamo" domain="[('fin_producto', '=', 'prestamo')]"/>
+                <filter name="tarjeta" string="Tarjeta" domain="[('fin_producto', '=', 'tarjeta')]"/>
+                <filter name="seguro" string="Seguro vehicular" domain="[('fin_producto', '=', 'seguro')]"/>
+                <separator/>
+                <filter name="ingreso" string="Fecha de ingreso" date="create_date"/>
+                <filter name="cierre" string="Fecha de cierre" date="date_closed"/>
+                <group>
+                    <filter name="group_etapa" string="Etapa" context="{'group_by': 'stage_id'}"/>
+                    <filter name="group_producto" string="Producto" context="{'group_by': 'fin_producto'}"/>
+                    <filter name="group_origen" string="Origen" context="{'group_by': 'fin_origen'}"/>
+                    <filter name="group_vendedora" string="Vendedora" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_motivo" string="Motivo de pérdida" context="{'group_by': 'lost_reason_id'}"/>
+                    <filter name="group_semana" string="Semana de ingreso" context="{'group_by': 'create_date:week'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ======================= Gráfico y pivote ======================= -->
+    <record id="view_oportunidad_graph" model="ir.ui.view">
+        <field name="name">financiera.oportunidad.graph</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <graph string="Oportunidades" type="bar" sample="1">
+                <field name="create_date" interval="week"/>
+                <field name="fin_producto"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_oportunidad_pivot" model="ir.ui.view">
+        <field name="name">financiera.oportunidad.pivot</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <pivot string="Oportunidades" sample="1">
+                <field name="user_id" type="row"/>
+                <field name="fin_producto" type="col"/>
+                <field name="fin_importe_final" type="measure"/>
+                <field name="fin_horas_primer_contacto" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ======================= Acciones ======================= -->
+    <record id="action_oportunidades" model="ir.actions.act_window">
+        <field name="name">Oportunidades</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">kanban,list,form,graph,pivot</field>
+        <field name="domain">[('type', '=', 'opportunity')]</field>
+        <field name="context">{'default_type': 'opportunity', 'search_default_abiertas': 1}</field>
+        <field name="search_view_id" ref="view_oportunidad_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_oportunidad_kanban')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_oportunidad_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_oportunidad_form')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_oportunidad_graph')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_oportunidad_pivot')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No hay oportunidades</p>
+            <p>Entran solas desde Meta Lead Ads y WhatsApp, o se cargan a mano / por importación.</p>
+        </field>
+    </record>
+
+    <record id="action_analisis" model="ir.actions.act_window">
+        <field name="name">Análisis de oportunidades</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="domain">[('type', '=', 'opportunity')]</field>
+        <field name="search_view_id" ref="view_oportunidad_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_oportunidad_graph')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_oportunidad_pivot')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_oportunidad_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_oportunidad_form')})]"/>
+    </record>
+
+    <record id="action_reasignar" model="ir.actions.act_window">
+        <field name="name">Reasignar a…</field>
+        <field name="res_model">financiera.reasignar.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="crm.model_crm_lead"/>
+        <field name="binding_view_types">list,kanban</field>
+        <field name="group_ids" eval="[(4, ref('financiera_crm.group_admin'))]"/>
+    </record>
+</odoo>

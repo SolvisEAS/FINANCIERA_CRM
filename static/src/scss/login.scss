@@ -1,0 +1,12 @@
+.oe_login_form .btn.btn-primary,
+.oe_login_form button.btn-primary {
+    --btn-bg: #0B5F7A;
+    --btn-border-color: #0B5F7A;
+    --btn-hover-bg: #094c63;
+    --btn-hover-border-color: #094c63;
+    background-color: #0B5F7A !important;
+    border-color: #0B5F7A !important;
+    border-radius: 10px;
+    padding: .6rem 1rem;
+}
+.oe_login_form a, .oe_login_form .btn-link { color: #0B5F7A; }

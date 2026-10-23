@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_objetivo_list" model="ir.ui.view">
+        <field name="name">financiera.objetivo.list</field>
+        <field name="model">financiera.objetivo</field>
+        <field name="arch" type="xml">
+            <list string="Objetivos" editable="bottom" decoration-success="semaforo == 'verde'"
+                  decoration-warning="semaforo == 'amarillo'" decoration-danger="semaforo == 'rojo'">
+                <header>
+                    <button name="action_copiar_mes_anterior" type="object" string="Copiar objetivos del mes anterior"
+                            class="btn-secondary" display="always"/>
+                </header>
+                <field name="semaforo" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="user_id" string="Vendedora" domain="[('fin_es_vendedora', '=', True)]" options="{'no_create': True}"/>
+                <field name="mes"/>
+                <field name="anio" options="{'format': false}"/>
+                <field name="producto"/>
+                <field name="meta_cantidad" sum="Total"/>
+                <field name="meta_importe" optional="show"/>
+                <field name="logrado_cantidad"/>
+                <field name="logrado_importe" optional="show"/>
+                <field name="cumplimiento" widget="progressbar"/>
+                <field name="tipo_periodo" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_objetivo_pivot" model="ir.ui.view">
+        <field name="name">financiera.objetivo.pivot</field>
+        <field name="model">financiera.objetivo</field>
+        <field name="arch" type="xml">
+            <pivot string="Objetivos">
+                <field name="user_id" type="row"/>
+                <field name="producto" type="col"/>
+                <field name="meta_cantidad" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_objetivo_search" model="ir.ui.view">
+        <field name="name">financiera.objetivo.search</field>
+        <field name="model">financiera.objetivo</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id" string="Vendedora"/>
+                <field name="producto"/>
+                <filter name="mes_actual" string="Mes actual"
+                        domain="[('mes', '=', str(context_today().month)), ('anio', '=', context_today().year)]"/>
+                <group>
+                    <filter name="group_vendedora" string="Vendedora" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_periodo" string="Período" context="{'group_by': 'periodo'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_objetivos" model="ir.actions.act_window">
+        <field name="name">Carga de objetivos</field>
+        <field name="res_model">financiera.objetivo</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="context">{'search_default_mes_actual': 1, 'search_default_group_vendedora': 1}</field>
+        <field name="search_view_id" ref="view_objetivo_search"/>
+    </record>
+</odoo>
